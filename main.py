@@ -41,32 +41,58 @@ class SimulateAnealing():
             self.delta = self.new_value - self.value
             self.tmp = random.uniform(0,1)
             if self.delta < 0:
-                print("iteration:",i,", because of ∆",self.delta,"<0, swithes.")
+                #print("iteration:",i,", because of ∆",self.delta,"<0, swithes.")
                 self.path = self.new_path
                 self.value = self.new_value
             elif self.tmp <= math.exp(-self.delta/self.T):
-                print("iteration:",i,", because of p:",self.tmp,"<= exp(-∆/T)",math.exp(-self.delta/self.T)," switches.")
+                #print("iteration:",i,", because of p:",self.tmp,"<= exp(-∆/T)",math.exp(-self.delta/self.T)," switches.")
                 self.path = self.new_path
                 self.value = self.new_value 
             self.T *= self.a 
             if self.value < self.min_value:
                 self.min_value = self.new_value 
                 self.min_value_path = self.new_path
-                print("New min value:",self.min_value,"founded, and its path:",self.min_value_path)
-#read TSPtbl txt
+                #print("New min value:",self.min_value,"founded, and its path:",self.min_value_path)
+#start clock
 s_time = time.time()
+#read table
 tbl = []
-for f in open("gr17_d.txt","r",encoding ='UTF-8'):
+for f in open("tbl.txt","r",encoding ='UTF-8'):
     tbl.append(f.strip('\n').split(' '))
 #initial SA algorithm
-T = 100
+_t = 1000
+T = 150
 a = 0.99 
-n = 100000
-prob = SimulateAnealing(T, a, n, tbl)
-print(prob.path)
-print("the initial value:", prob.value)
-prob.solve()
-print("approximate optimal solution value:",prob.min_value)
-print("fitness function value:",prob.min_value_path)
-print("running time", time.time()-s_time)
+n = 1000
+sol = []
+min_sol = 10000
+path = []
+min_path =[]
+mean = 0
+var = 0
+for k in range(0,_t):
+    print("the ",k,"th iteration")
+    prob = SimulateAnealing(T, a, n, tbl)
+    if k == 0:
+        print("the initial path:",prob.path)
+        print("the initial value:", prob.value)
+    prob.solve()
+    print("the approximate optimal solution value:",prob.min_value)
+    print("the fitness function value:",prob.min_value_path)
+    sol.append(prob.min_value)
+    path.append(prob.min_value_path)
+    if prob.min_value < min_sol:
+        min_sol = sol[k] 
+        min_path = path[k]
+for k in range(0,_t):
+    mean += sol[k]
+mean /= _t 
+for k in range(0,_t):
+    var += ((sol[k]-mean)**2)
+var /= _t
+print("the min of approximate optimal solution value:", min_sol)
+print("with its path:",min_path)
+print("mean:",mean)
+print("variance:",var)
+print("run ",_t," times, with running time", time.time()-s_time)
 print("with T=",T,", cooling rate=",a,", n=",n,".")
